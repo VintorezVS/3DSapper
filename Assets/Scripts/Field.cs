@@ -4,13 +4,22 @@ using UnityEngine;
 
 public class Field : MonoBehaviour
 {
+    private (int, int, int) playerPosition = (0, 0, 0);
     [SerializeField] private List<GameObject> prefabs;
     [SerializeField] private List<GameObject> explosivePrefabs;
     private int size = 10;
     private int layers = 2;
-    private int explosiveCount = 5;
-    private Vector3 playerPosition = Vector3.zero;
+    private int explosiveCount = 20;
     private Dictionary<(int, int, int), GameObject> grid = new Dictionary<(int, int, int), GameObject>();
+
+    public Vector3 PlayerPosition
+    {
+        get => Utils.TupleToVector3(playerPosition);
+        set
+        {
+            playerPosition = Utils.Vector3ToTuple(value);
+        }
+    }
 
     public void SetFieldParameters(int size, int layers, int explosiveCount)
     {
@@ -73,8 +82,8 @@ public class Field : MonoBehaviour
 
     Vector3 GenerateUniqueRandomCoordinateForLayer(int layer, List<Vector3> usedCoordinates)
     {
-        Vector3 coordinates = playerPosition;
-        System.Predicate<Vector3> isAvailable = (coords) => coordinates != playerPosition && !usedCoordinates.Any(used => used == coordinates);
+        Vector3 coordinates = PlayerPosition;
+        System.Predicate<Vector3> isAvailable = (coords) => coordinates != PlayerPosition && !usedCoordinates.Any(used => used == coordinates);
         IterateOverFieldLayer(
             layer,
             (coords) => coordinates = new Vector3(Random.Range(0, size), Random.Range(0, size), layer),
@@ -91,8 +100,8 @@ public class Field : MonoBehaviour
 
     Vector3 GetFirstEmptyCoordinateForLayer(int layer, List<Vector3> usedCoordinates)
     {
-        Vector3 coordinates = playerPosition;
-        System.Predicate<Vector3> isAvailable = (coords) => coordinates != playerPosition && !usedCoordinates.Any(used => used == coordinates);
+        Vector3 coordinates = PlayerPosition;
+        System.Predicate<Vector3> isAvailable = (coords) => coordinates != PlayerPosition && !usedCoordinates.Any(used => used == coordinates);
         IterateOverFieldLayer(layer, (coords) => coordinates = coords, isAvailable);
 
         if (!isAvailable(coordinates))
@@ -116,7 +125,7 @@ public class Field : MonoBehaviour
             for (int j = 0; j < size; j++)
             {
                 coordinates = new Vector3(i, j, layer);
-                if (new Vector3(i, j, layer) == playerPosition) continue;
+                if (new Vector3(i, j, layer) == PlayerPosition) continue;
                 if (shouldBreak != null && shouldBreak(coordinates)) break;
                 action(coordinates);
             }
