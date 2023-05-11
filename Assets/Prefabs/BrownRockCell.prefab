@@ -9,7 +9,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 5815194780494089110, guid: deb62dcd6ae7b8c46a762d6b7fa7affe, type: 3}
       propertyPath: m_Name
-      value: Cube
+      value: BrownRockCell
       objectReference: {fileID: 0}
     - target: {fileID: 6336644085385500922, guid: deb62dcd6ae7b8c46a762d6b7fa7affe, type: 3}
       propertyPath: m_RootOrder
@@ -59,5 +59,9 @@ PrefabInstance:
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: 54735efb3b5e2324086b1ffe5f845d1b, type: 2}
+    - target: {fileID: 7348966710580904043, guid: deb62dcd6ae7b8c46a762d6b7fa7affe, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: deb62dcd6ae7b8c46a762d6b7fa7affe, type: 3}

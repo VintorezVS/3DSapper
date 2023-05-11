@@ -16,6 +16,11 @@ public class PlayerController : MonoBehaviour
         ChangeProjection(Projection.Right);
     }
 
+    public void MoveTo(Vector3 targetPosition)
+    {
+        transform.position = targetPosition;
+    }
+
     private void ChangeProjection(Projection projection)
     {
         if (isChangingProjection) return;
@@ -27,7 +32,6 @@ public class PlayerController : MonoBehaviour
     {
         while (Mathf.Abs(transform.rotation.eulerAngles.y - targetAngle) % 360 > 5)
         {
-            Debug.Log(Mathf.Abs(transform.rotation.eulerAngles.y - targetAngle));
             transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.Euler(0f, targetAngle, 0f), changeProjectionSpeed * Time.deltaTime);
             yield return null;
         }

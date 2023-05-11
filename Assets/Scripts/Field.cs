@@ -1,12 +1,15 @@
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class Field : MonoBehaviour
 {
     private (int, int, int) playerPosition = (0, 0, 0);
-    [SerializeField] private List<GameObject> prefabs;
-    [SerializeField] private List<GameObject> explosivePrefabs;
+    [SerializeField] private TextMeshProUGUI currentCellText;
+    [SerializeField] private GameObject emptyCellPrefab;
+    [SerializeField] private List<GameObject> rockCellPrefabs;
+    [SerializeField] private List<GameObject> explosiveCellPrefabs;
     private int size = 10;
     private int layers = 2;
     private int explosiveCount = 20;
@@ -15,10 +18,18 @@ public class Field : MonoBehaviour
     public Vector3 PlayerPosition
     {
         get => Utils.TupleToVector3(playerPosition);
-        set
-        {
-            playerPosition = Utils.Vector3ToTuple(value);
-        }
+        set => playerPosition = Utils.Vector3ToTuple(value);
+    }
+
+    public Cell GetPlayerCell()
+    {
+        return GetCell(playerPosition);
+    }
+
+    public Cell GetCell((int, int, int) coordinates)
+    {
+        if (!grid.ContainsKey(coordinates)) return null;
+        return grid[coordinates].GetComponent<Cell>();
     }
 
     public void SetFieldParameters(int size, int layers, int explosiveCount)
@@ -42,6 +53,94 @@ public class Field : MonoBehaviour
         {
             GenerateCellsForLayer(layer, layer == layers - 1 ? explosivesPerLayer + explosiveCount % layers : explosivesPerLayer);
         }
+
+        CreateEmptyCell(Projection.Front);
+    }
+
+    public void UpdateEmptyCells(Projection currentProjection)
+    {
+        EmptyCell[] emptyCells = FindObjectsOfType<EmptyCell>();
+        bool isZProjection = currentProjection == Projection.Front || currentProjection == Projection.Back;
+
+        foreach (var cell in emptyCells)
+        {
+            (int, int, int) cellCoords = Utils.Vector3ToTuple(cell.transform.position);
+            bool isXAlignedWithPlayer = cellCoords.Item1 == playerPosition.Item1;
+            bool isZAlignedWithPlayer = cellCoords.Item3 == playerPosition.Item3;
+            bool isCurrent = cellCoords == playerPosition;
+            bool isHidden = isCurrent || (isZProjection ? !isZAlignedWithPlayer : !isXAlignedWithPlayer);
+
+            cell.Text = isHidden ? "" : GetNearExplosives(cellCoords, currentProjection).ToString();
+            cell.transform.rotation = Quaternion.AngleAxis(((int)currentProjection), Vector3.up);
+
+            if (isCurrent)
+            {
+                currentCellText.text = GetNearExplosives(playerPosition, currentProjection).ToString();
+            }
+        }
+    }
+
+    public void MovePlayerTo(Vector3 roundedCellPosition, Projection currentProjection)
+    {
+        EmptyCell previousCell = GetCell(playerPosition) as EmptyCell;
+        PlayerPosition = roundedCellPosition;
+        Cell cell = GetCell(playerPosition);
+        cell.OnHit();
+
+        if (cell is RockCell) CreateEmptyCell(currentProjection);
+        if (cell is EmptyCell)
+        {
+            EmptyCell emptyCell = cell as EmptyCell;
+            currentCellText.text = emptyCell.Text;
+            emptyCell.Text = "";
+        }
+
+        previousCell.SetNearExplosiveCount(GetNearExplosives(Utils.Vector3ToTuple(previousCell.transform.position), currentProjection));
+        previousCell.transform.rotation = Quaternion.AngleAxis(((int)currentProjection), Vector3.up);
+    }
+
+    public bool IsCellMarked(Vector3 cellPosition)
+    {
+        return GetCell(Utils.Vector3ToTuple(cellPosition)).IsMarked;
+    }
+
+    public bool IsCellPosition(Vector3 cellPosition)
+    {
+        return grid.ContainsKey(Utils.Vector3ToTuple(cellPosition));
+    }
+
+    public void ToggleCellMark(Vector3 cellPosition)
+    {
+        GetCell(Utils.Vector3ToTuple(cellPosition)).ToggleMark();
+    }
+
+    private int GetNearExplosives((int, int, int) value, Projection projection)
+    {
+        return GetSiblingsCoordinates(value, projection)
+            .Where(coords => grid.ContainsKey(coords))
+            .Select(coords => grid[coords].GetComponent<Cell>())
+            .Count(cell => cell.IsExplosive);
+    }
+
+    private List<(int, int, int)> GetSiblingsCoordinates((int, int, int) value, Projection projection)
+    {
+        List<(int, int, int)> result = new List<(int, int, int)>();
+        bool isByXAxis = projection == Projection.Front || projection == Projection.Back;
+        int x = isByXAxis ? value.Item1 : value.Item3;
+        int y = value.Item2;
+
+        for (int i = -1; i <= 1; i++)
+        {
+            int localX = x + i;
+            for (int j = -1; j <= 1; j++)
+            {
+                int localY = y + j;
+                if (i == 0 && j == 0) continue;
+                result.Add(isByXAxis ? (localX, localY, value.Item3) : (value.Item1, localY, localX));
+            }
+        }
+
+        return result;
     }
 
     void GenerateCellsForLayer(int layer, int explosiveCount)
@@ -60,10 +159,25 @@ public class Field : MonoBehaviour
         );
     }
 
+    void CreateEmptyCell(Projection currentProjection)
+    {
+        grid[playerPosition] = CreateCell(PlayerPosition, emptyCellPrefab);
+        currentCellText.text = GetNearExplosives(playerPosition, currentProjection).ToString();
+    }
+
     GameObject CreateCell(Vector3 position, bool isExplosive)
     {
         int layer = (int)position.z;
-        GameObject prefab = isExplosive ? explosivePrefabs[layer] : prefabs[layer];
+        GameObject prefab = isExplosive ? explosiveCellPrefabs[layer] : rockCellPrefabs[layer];
+        GameObject cell = Instantiate(prefab);
+        cell.transform.position = position;
+        cell.transform.SetParent(transform);
+        return cell;
+    }
+
+    GameObject CreateCell(Vector3 position, GameObject prefab)
+    {
+        int layer = (int)position.z;
         GameObject cell = Instantiate(prefab);
         cell.transform.position = position;
         cell.transform.SetParent(transform);
