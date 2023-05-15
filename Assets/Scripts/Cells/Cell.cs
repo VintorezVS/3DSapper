@@ -4,6 +4,8 @@ public abstract class Cell : MonoBehaviour
 {
     protected CellType type;
     protected GameObject flag;
+    protected GameObject hover;
+    public bool IsInteractive { get; set; } = false;
     public bool IsMarked { get; protected set; }
     public bool IsExplosive
     {
@@ -17,6 +19,7 @@ public abstract class Cell : MonoBehaviour
     protected virtual void Awake()
     {
         flag = transform.Find("Flag")?.gameObject;
+        hover = transform.Find("Hover")?.gameObject;
     }
 
     public virtual void OnHit()
@@ -29,5 +32,16 @@ public abstract class Cell : MonoBehaviour
         if (IsEmpty) return;
         IsMarked = !IsMarked;
         flag.SetActive(IsMarked);
+    }
+
+    private void OnMouseEnter()
+    {
+        if (!IsInteractive) return;
+        hover.SetActive(true);
+    }
+
+    private void OnMouseExit()
+    {
+        hover.SetActive(false);
     }
 }

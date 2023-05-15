@@ -56,7 +56,7 @@ public class MainManager : MonoBehaviour
 
     private void UpdateField(Projection projection)
     {
-        field.UpdateEmptyCells(GetProjectionByAngle((int)player.transform.rotation.eulerAngles.y + ((int)projection)));
+        field.OnProjectionChange(GetProjectionByAngle((int)player.transform.rotation.eulerAngles.y + ((int)projection)));
     }
 
     private Projection GetProjectionByAngle(int angle)
