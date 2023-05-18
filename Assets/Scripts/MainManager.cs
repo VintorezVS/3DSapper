@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using TMPro;
 
@@ -7,9 +8,21 @@ public class MainManager : MonoBehaviour
     [SerializeField] private Field field;
     [SerializeField] private PlayerController player;
     [SerializeField] private GameMenuManager gameMenu;
+    [SerializeField] private GameObject gameOverMenu;
+    [SerializeField] private TextMeshProUGUI gameOverText;
     [SerializeField] private TextMeshProUGUI time;
 
     public float LevelTime { get; private set; } = 0;
+
+    private void OnEnable()
+    {
+        GameManager.Instance.OnGameOver += HandleGameOver;
+    }
+
+    private void OnDisable()
+    {
+        GameManager.Instance.OnGameOver -= HandleGameOver;
+    }
 
     void Start()
     {
@@ -53,7 +66,8 @@ public class MainManager : MonoBehaviour
     {
         if (!GameManager.Instance.IsGameInProgress || Time.timeScale == 0) return;
 
-        time.text = Time.timeSinceLevelLoad.ToString("0.00");
+        LevelTime = Time.timeSinceLevelLoad;
+        time.text = LevelTime.ToString("0.00");
     }
 
     public void ChangeProjectionToLeft()
@@ -71,6 +85,19 @@ public class MainManager : MonoBehaviour
     private void UpdateField(Projection projection)
     {
         field.OnProjectionChange(GetProjectionByAngle((int)player.transform.rotation.eulerAngles.y + ((int)projection)));
+    }
+
+    private void HandleGameOver(bool isWin)
+    {
+        StartCoroutine(ShowGameOverMenu(isWin));
+    }
+
+    private IEnumerator ShowGameOverMenu(bool isWin)
+    {
+        yield return new WaitForSeconds(0.5f);
+        string finalText = isWin ? "Level passed" : "Level failed";
+        gameOverText.text = $"<b>{finalText}</b>\nTime: {LevelTime:0.00}";
+        gameOverMenu.SetActive(true);
     }
 
     private Projection GetProjectionByAngle(int angle)

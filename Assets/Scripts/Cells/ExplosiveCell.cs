@@ -14,6 +14,6 @@ public class ExplosiveCell : Cell
     public override void OnHit()
     {
         dynamite.SetActive(true);
-        GameManager.Instance.GameOver();
+        GameManager.Instance.Lose();
     }
 }

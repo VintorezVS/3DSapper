@@ -19,6 +19,14 @@ public class Field : MonoBehaviour
         set => playerPosition = Utils.Vector3ToTuple(value);
     }
 
+    private void FixedUpdate()
+    {
+        if (isAllEmptyCellsRevealed() || isAllExplosivesMarked())
+        {
+            GameManager.Instance.Win();
+        }
+    }
+
     public Cell GetPlayerCell()
     {
         return GetCell(playerPosition);
@@ -102,6 +110,16 @@ public class Field : MonoBehaviour
     public void ToggleCellMark(Vector3 cellPosition)
     {
         GetCell(Utils.Vector3ToTuple(cellPosition)).ToggleMark();
+    }
+
+    private bool isAllEmptyCellsRevealed()
+    {
+        return !grid.Values.Any(cell => cell.GetComponent<Cell>() is RockCell);
+    }
+
+    private bool isAllExplosivesMarked()
+    {
+        return grid.Values.Select(obj => obj.GetComponent<Cell>()).Where(cell => cell is ExplosiveCell).All(cell => cell.IsMarked);
     }
 
     private int GetNearExplosives((int, int, int) value, Projection projection)

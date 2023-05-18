@@ -36,7 +36,7 @@ public abstract class Cell : MonoBehaviour
 
     private void OnMouseEnter()
     {
-        if (!IsInteractive || Time.timeScale == 0) return;
+        if (!IsInteractive || !GameManager.Instance.IsGameInProgress || Time.timeScale == 0) return;
         hover.SetActive(true);
     }
 
