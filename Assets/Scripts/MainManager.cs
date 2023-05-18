@@ -1,18 +1,18 @@
 using UnityEngine;
+using TMPro;
 
 public class MainManager : MonoBehaviour
 {
     [SerializeField] private Camera mainCamera;
-    [SerializeField] private GameObject fieldObject;
-    [SerializeField] private GameObject playerObject;
-    private Field field;
-    private PlayerController player;
+    [SerializeField] private Field field;
+    [SerializeField] private PlayerController player;
+    [SerializeField] private GameMenuManager gameMenu;
+    [SerializeField] private TextMeshProUGUI time;
+
+    public float LevelTime { get; private set; } = 0;
 
     void Start()
     {
-        field = fieldObject.GetComponent<Field>();
-        player = playerObject.GetComponent<PlayerController>();
-        field.PlayerPosition = playerObject.transform.position;
         field.Generate();
     }
 
@@ -20,8 +20,15 @@ public class MainManager : MonoBehaviour
     {
         if (!GameManager.Instance.IsGameInProgress) return;
 
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            gameMenu.ToggleMenu();
+        }
+
+        if (Time.timeScale == 0) return;
+
         bool isLeftClick = Input.GetMouseButtonDown(0);
-        bool isRightClick = Input.GetMouseButtonDown(2);
+        bool isRightClick = Input.GetMouseButtonDown(1);
 
         if (isLeftClick || isRightClick)
         {
@@ -40,6 +47,13 @@ public class MainManager : MonoBehaviour
                 player.MoveTo(roundedCellPosition);
             }
         }
+    }
+
+    private void FixedUpdate()
+    {
+        if (!GameManager.Instance.IsGameInProgress || Time.timeScale == 0) return;
+
+        time.text = Time.timeSinceLevelLoad.ToString("0.00");
     }
 
     public void ChangeProjectionToLeft()
