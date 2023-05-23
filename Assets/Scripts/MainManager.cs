@@ -26,7 +26,11 @@ public class MainManager : MonoBehaviour
 
     void Start()
     {
-        field.Generate();
+        field.Generate(
+            PlayerPrefs.GetInt(Constants.FIELD_SIZE),
+            PlayerPrefs.GetInt(Constants.LAYERS_COUNT),
+            PlayerPrefs.GetInt(Constants.BOMBS_COUNT)
+        );
     }
 
     private void Update()

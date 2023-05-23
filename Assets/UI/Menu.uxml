@@ -1,8 +1,0 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <ui:VisualElement name="body" style="height: 100%; width: 100%; justify-content: center; background-color: rgb(19, 19, 19);">
-        <ui:VisualElement name="main" style="margin-left: auto; margin-right: auto; margin-top: 0; margin-bottom: 0; justify-content: space-around; padding-left: 10px; padding-right: 10px; padding-top: 5px; padding-bottom: 5px; height: 50%;">
-            <ui:Label text="3D Sapper" display-tooltip-when-elided="true" name="title" style="-unity-font: url(&apos;project://database/Library/unity%20default%20resources?fileID=10102&amp;guid=0000000000000000e000000000000000&amp;type=0#Arial&apos;); -unity-font-style: bold; font-size: 48px; -unity-text-align: upper-center; color: rgb(255, 130, 47);" />
-            <ui:Button text="Start" display-tooltip-when-elided="true" name="start" style="margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 10px; padding-right: 10px; padding-top: 5px; padding-bottom: 5px; -unity-font: url(&apos;project://database/Library/unity%20default%20resources?fileID=10102&amp;guid=0000000000000000e000000000000000&amp;type=0#Arial&apos;); -unity-font-style: normal; font-size: 36px;" />
-        </ui:VisualElement>
-    </ui:VisualElement>
-</ui:UXML>

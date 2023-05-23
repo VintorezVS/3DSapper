@@ -60,7 +60,7 @@ public class Field : MonoBehaviour
             GenerateCellsForLayer(layer, layer == layers - 1 ? explosivesPerLayer + explosiveCount % layers : explosivesPerLayer);
         }
 
-        CreateEmptyCell(Projection.Front);
+        OpenRockCell(PlayerPosition, Projection.Front);
         GetSiblingCells(playerPosition, Projection.Front).ForEach(cell => cell.IsInteractive = true);
     }
 
@@ -71,13 +71,19 @@ public class Field : MonoBehaviour
 
         foreach (var cell in emptyCells)
         {
-            (int, int, int) cellCoords = Utils.Vector3ToTuple(cell.transform.position);
-            bool isXAlignedWithPlayer = cellCoords.Item1 == playerPosition.Item1;
-            bool isZAlignedWithPlayer = cellCoords.Item3 == playerPosition.Item3;
+            (int, int, int) cellCoordinates = Utils.Vector3ToTuple(cell.transform.position);
+            bool isXAlignedWithPlayer = cellCoordinates.Item1 == playerPosition.Item1;
+            bool isZAlignedWithPlayer = cellCoordinates.Item3 == playerPosition.Item3;
             bool isHidden = isZProjection ? !isZAlignedWithPlayer : !isXAlignedWithPlayer;
 
-            cell.Text = isHidden ? "" : GetNearExplosives(cellCoords, currentProjection).ToString();
+            int explosives = GetNearExplosives(cellCoordinates, currentProjection);
+            cell.Text = isHidden ? "" : explosives.ToString();
             cell.transform.rotation = Quaternion.AngleAxis(((int)currentProjection), Vector3.up);
+
+            if (explosives == 0 && !isHidden)
+            {
+                OpenSiblingRockCells(cellCoordinates, currentProjection);
+            }
         }
     }
 
@@ -87,11 +93,7 @@ public class Field : MonoBehaviour
         PlayerPosition = roundedCellPosition;
         Cell cell = GetCell(playerPosition);
 
-        if (cell is RockCell)
-        {
-            Destroy(cell.gameObject);
-            CreateEmptyCell(currentProjection);
-        }
+        if (cell is RockCell) OpenRockCell(PlayerPosition, currentProjection);
 
         cell.OnHit();
         GetSiblingCells(playerPosition, currentProjection).ForEach(cell => cell.IsInteractive = true);
@@ -172,18 +174,39 @@ public class Field : MonoBehaviour
         );
     }
 
-    void CreateEmptyCell(Projection currentProjection)
+    EmptyCell OpenRockCell(Vector3 position, Projection currentProjection)
     {
-        grid[playerPosition] = CreateCell(PlayerPosition, emptyCellPrefab);
-        EmptyCell cell = grid[playerPosition].GetComponent<EmptyCell>();
-        cell.SetNearExplosiveCount(GetNearExplosives(playerPosition, currentProjection));
+        (int, int, int) cellCoordinates = Utils.Vector3ToTuple(position);
+        if (grid.ContainsKey(cellCoordinates)) Destroy(grid[cellCoordinates].gameObject);
+        grid[cellCoordinates] = CreateCell(position, emptyCellPrefab);
+
+        EmptyCell cell = grid[cellCoordinates].GetComponent<EmptyCell>();
+        int explosives = GetNearExplosives(cellCoordinates, currentProjection);
+        cell.SetNearExplosiveCount(explosives);
         cell.transform.rotation = Quaternion.AngleAxis(((int)currentProjection), Vector3.up);
+
+        if (explosives == 0)
+        {
+            OpenSiblingRockCells(cellCoordinates, currentProjection);
+        }
+
+        return cell;
+    }
+
+    List<EmptyCell> OpenSiblingRockCells((int, int, int) cellCoordinates, Projection currentProjection)
+    {
+        return GetSiblingCells(cellCoordinates, currentProjection)
+            .Where(cell => cell is RockCell)
+            .Select(cell => OpenRockCell(cell.transform.position, currentProjection))
+            .ToList();
     }
 
     GameObject CreateCell(Vector3 position, bool isExplosive)
     {
         int layer = (int)position.z;
-        GameObject prefab = isExplosive ? explosiveCellPrefabs[layer] : rockCellPrefabs[layer];
+        GameObject prefab = isExplosive
+            ? explosiveCellPrefabs[layer % explosiveCellPrefabs.Count]
+            : rockCellPrefabs[layer % rockCellPrefabs.Count];
         GameObject cell = Instantiate(prefab);
         cell.transform.position = position;
         cell.transform.SetParent(transform);
