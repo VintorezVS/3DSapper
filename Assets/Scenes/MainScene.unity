@@ -210,6 +210,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 2145136054}
+  minZoom: 2
+  maxZoom: 10
 --- !u!4 &53698210
 Transform:
   m_ObjectHideFlags: 0
@@ -5724,11 +5726,14 @@ MonoBehaviour:
 
 
     <i><b>Mouse
-    Right</b></i> - Marks/ unmarks cells with a flag (mined);
+    Right</b></i> - Marks/unmarks cells with a flag (mined);
 
 
-    <i><b>Escape</b></i>
-    - Opens in-game menu.'
+    <i><b>Scroll Wheel</b></i>
+    - Zoom in/out.
+
+
+    <i><b>Escape</b></i> - Opens in-game menu.'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 5302535af1044152a457ed104f1f4b91, type: 2}
   m_sharedMaterial: {fileID: 2164040, guid: 5302535af1044152a457ed104f1f4b91, type: 2}
@@ -5755,8 +5760,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 16
-  m_fontSizeBase: 16
+  m_fontSize: 14
+  m_fontSizeBase: 14
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
