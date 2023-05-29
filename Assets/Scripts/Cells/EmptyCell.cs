@@ -1,6 +1,7 @@
 using UnityEngine;
 using TMPro;
 
+// INHERITANCE
 public class EmptyCell : Cell
 {
     [SerializeField] private TextMeshProUGUI textObject;
@@ -11,6 +12,7 @@ public class EmptyCell : Cell
         set => textObject.text = value;
     }
 
+    // POLYMORPHISM
     protected override void Awake()
     {
         type = CellType.Empty;
