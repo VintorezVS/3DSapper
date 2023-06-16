@@ -62,6 +62,14 @@ public class MenuManager : MonoBehaviour
         GameManager.Instance.StartGame();
     }
 
+    public void ExitGame()
+    {
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#endif
+        Application.Quit();
+    }
+
     private void SetInitialValues()
     {
         fieldSizeSlider.gameObject.SetActive(false);
@@ -89,6 +97,6 @@ public class MenuManager : MonoBehaviour
 
     private int ClampBombsCount(int bombsCount)
     {
-        return Mathf.Clamp(bombsCount, 2, 4050);
+        return Mathf.Clamp(bombsCount, 2, 3150);
     }
 }

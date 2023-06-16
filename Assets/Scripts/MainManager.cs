@@ -2,16 +2,14 @@ using System.Collections;
 using UnityEngine;
 using TMPro;
 
-public class MainManager : MonoBehaviour
+public class MainManager : MonoBehaviourSingleton<MainManager>
 {
-    [SerializeField] private Camera mainCamera;
     [SerializeField] private Field field;
-    [SerializeField] private PlayerController player;
     [SerializeField] private GameMenuManager gameMenu;
     [SerializeField] private GameObject gameOverMenu;
     [SerializeField] private TextMeshProUGUI gameOverText;
-    [SerializeField] private TextMeshProUGUI time;
 
+    public Projection currentProjection { get; private set; } = new Projection();
     public float LevelTime { get; private set; } = 0;
 
     private void OnEnable()
@@ -41,29 +39,6 @@ public class MainManager : MonoBehaviour
         {
             gameMenu.ToggleMenu();
         }
-
-        if (Time.timeScale == 0) return;
-
-        bool isLeftClick = Input.GetMouseButtonDown(0);
-        bool isRightClick = Input.GetMouseButtonDown(1);
-
-        if (isLeftClick || isRightClick)
-        {
-            Vector3 cellPosition = mainCamera.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, mainCamera.farClipPlane));
-            Vector3 roundedCellPosition = new Vector3(Mathf.Round(cellPosition.x), Mathf.Round(cellPosition.y), Mathf.Round(cellPosition.z));
-
-            if (!field.IsCellPosition(roundedCellPosition) || field.PlayerPosition == roundedCellPosition) return;
-
-            if (isRightClick)
-            {
-                field.ToggleCellMark(roundedCellPosition);
-            }
-            else if (Vector3.Distance(field.PlayerPosition, roundedCellPosition) <= 1.5 && !field.IsCellMarked(roundedCellPosition))
-            {
-                field.MovePlayerTo(roundedCellPosition, GetProjectionByAngle((int)player.transform.rotation.eulerAngles.y));
-                player.MoveTo(roundedCellPosition);
-            }
-        }
     }
 
     private void FixedUpdate()
@@ -71,24 +46,31 @@ public class MainManager : MonoBehaviour
         if (!GameManager.Instance.IsGameInProgress || Time.timeScale == 0) return;
 
         LevelTime = Time.timeSinceLevelLoad;
-        time.text = LevelTime.ToString("0.00");
     }
 
-    public void ChangeProjectionToLeft()
+    public bool CanPlayerMoveTo(Vector3Int roundedNextPosition)
     {
-        UpdateField(Projection.Left);
-        player.ChangeProjectionToLeft();
+        return field.IsCellPosition(roundedNextPosition) && field.PlayerPosition != roundedNextPosition;
     }
 
-    public void ChangeProjectionToRight()
+    public void CheckCurrentCell()
     {
-        UpdateField(Projection.Right);
-        player.ChangeProjectionToRight();
+        field.CheckCell();
     }
 
-    private void UpdateField(Projection projection)
+    public void MarkCurrentCell()
     {
-        field.OnProjectionChange(GetProjectionByAngle((int)player.transform.rotation.eulerAngles.y + ((int)projection)));
+        field.ToggleCellMark();
+    }
+
+    public void ChangeProjection(Direction direction)
+    {
+        currentProjection.Rotate(direction);
+    }
+
+    public Vector3Int ApplyProjection(Vector2Int vector)
+    {
+        return currentProjection.RightwardDirection * vector.x + currentProjection.UpwardDirection * vector.y;
     }
 
     private void HandleGameOver(bool isWin)
@@ -102,12 +84,5 @@ public class MainManager : MonoBehaviour
         string finalText = isWin ? "Level passed" : "Level failed";
         gameOverText.text = $"<b>{finalText}</b>\nTime: {LevelTime:0.00}";
         gameOverMenu.SetActive(true);
-    }
-
-    private Projection GetProjectionByAngle(int angle)
-    {
-        angle %= 360;
-        if (angle == 270) angle = -90;
-        return (Projection)angle;
     }
 }

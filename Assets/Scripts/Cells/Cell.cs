@@ -5,7 +5,7 @@ public abstract class Cell : MonoBehaviour
     protected CellType type;
     protected GameObject flag;
     protected GameObject hover;
-    public bool IsInteractive { get; set; } = false;
+    // public bool IsInteractive { get; set; } = false;
     public bool IsMarked { get; protected set; }
     public bool IsExplosive
     {
@@ -34,14 +34,14 @@ public abstract class Cell : MonoBehaviour
         flag.SetActive(IsMarked);
     }
 
-    private void OnMouseEnter()
-    {
-        if (!IsInteractive || !GameManager.Instance.IsGameInProgress || Time.timeScale == 0) return;
-        hover.SetActive(true);
-    }
+    // private void OnMouseEnter()
+    // {
+    //     if (!IsInteractive || !GameManager.Instance.IsGameInProgress || Time.timeScale == 0) return;
+    //     hover.SetActive(true);
+    // }
 
-    private void OnMouseExit()
-    {
-        hover.SetActive(false);
-    }
+    // private void OnMouseExit()
+    // {
+    //     hover.SetActive(false);
+    // }
 }
