@@ -1,11 +1,13 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class MenuManager : MonoBehaviour
 {
     [SerializeField] private Slider fieldSizeSlider;
     [SerializeField] private Slider layersCountSlider;
     [SerializeField] private Slider bombsDensitySlider;
+    [SerializeField] private TextMeshProUGUI bombsCountText;
     private int fieldSize = 10;
     private int layersCount = 2;
     private int bombsCount = 20;
@@ -45,6 +47,7 @@ public class MenuManager : MonoBehaviour
     private void HandleBombsDensityValueChanged(float value)
     {
         bombsCount = ClampBombsCount(Mathf.RoundToInt(layersCount * fieldSize * fieldSize * value / 100));
+        bombsCountText.text = bombsCount.ToString();
     }
 
     private void LoadSavedPrefs()
@@ -79,6 +82,7 @@ public class MenuManager : MonoBehaviour
         fieldSizeSlider.SetValueWithoutNotify(fieldSize);
         layersCountSlider.SetValueWithoutNotify(layersCount);
         bombsDensitySlider.SetValueWithoutNotify(bombsCount * 100 / (fieldSize * fieldSize * layersCount));
+        bombsCountText.text = bombsCount.ToString();
 
         fieldSizeSlider.gameObject.SetActive(true);
         layersCountSlider.gameObject.SetActive(true);
